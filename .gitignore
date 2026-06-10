@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# local secrets
+.env
+.env.local
+.env.*.local
+
+# generated project assets
+projects/
+
+# local Claude/session memory
+.claude/
+.remember/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# logs/temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

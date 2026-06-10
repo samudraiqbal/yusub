@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Faceless History Pipeline</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>YouTube History Pipeline</h1>
+      <div class="project-selector">
+        <label for="project-list">Select Project:</label>
+        <select id="project-list">
+          <option value="">-- Choose or Create --</option>
+        </select>
+        <button id="btn-new-project" class="btn btn-secondary">New Project</button>
+        <button id="btn-delete-project" class="btn btn-secondary hidden" style="border-color: var(--error); color: var(--error);">Delete Project</button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar / Config -->
+      <aside class="sidebar">
+        <!-- New Project Modal/Form -->
+        <div id="new-project-form" class="card form-card">
+          <h2>Create New Project</h2>
+          <div class="form-group">
+            <label for="p-title">Video Topic / Title:</label>
+            <input type="text" id="p-title" placeholder="e.g. The Fall of the Roman Empire">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="p-duration">Duration (Minutes):</label>
+              <select id="p-duration">
+                <option value="8">8 Min</option>
+                <option value="10" selected>10 Min</option>
+                <option value="12">12 Min</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="p-style">Style:</label>
+              <select id="p-style">
+                <option value="dark history documentary" selected>Dark History</option>
+                <option value="mystery history">Mystery History</option>
+                <option value="war documentary">War Documentary</option>
+                <option value="ancient empire">Ancient Empire</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="p-tone">Narrative Tone:</label>
+            <select id="p-tone">
+              <option value="cinematic" selected>Cinematic</option>
+              <option value="dramatic">Dramatic</option>
+              <option value="serious">Serious</option>
+              <option value="documentary">Documentary</option>
+            </select>
+          </div>
+          <button id="btn-create-project" class="btn btn-primary btn-block">Create Project</button>
+        </div>
+
+        <!-- Project Status & Asset Management -->
+        <div id="project-status" class="card status-card hidden">
+          <h2>Project Status</h2>
+          <div class="status-item">
+            <span class="status-label">Voice-over:</span>
+            <span id="status-voice" class="badge badge-error">Missing</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Background Music:</span>
+            <span id="status-music" class="badge badge-error">Missing</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Subtitles (SRT):</span>
+            <span id="status-subtitles" class="badge badge-error">Missing</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Rendered Video:</span>
+            <span id="status-video" class="badge badge-error">Missing</span>
+          </div>
+
+          <div class="asset-actions">
+            <h3>Generate Audio / SRT</h3>
+            <button id="btn-gen-voice" class="btn btn-secondary btn-block">Generate Voice-Over</button>
+            <button id="btn-gen-subs" class="btn btn-secondary btn-block">Generate SRT Subtitles</button>
+
+            <h3>Background Music</h3>
+            <input type="file" id="music-file" accept="audio/mp3" style="display: none;">
+            <button id="btn-upload-music" class="btn btn-secondary btn-block">Upload music.mp3</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Workspace -->
+      <main class="workspace">
+        <!-- Dashboard Placeholder -->
+        <div id="workspace-placeholder" class="card empty-card">
+          <p>Please select a project from the header or create a new one to begin your history video pipeline.</p>
+        </div>
+
+        <!-- Active Project Workspace -->
+        <div id="workspace-active" class="hidden">
+          <!-- Step 1: Script Writer -->
+          <section class="card workflow-section">
+            <div class="section-header">
+              <h2>Step 1: English Script</h2>
+              <button id="btn-generate-script" class="btn btn-primary">Generate Script</button>
+            </div>
+            <textarea id="script-editor" placeholder="Write or generate your video script here..."></textarea>
+            <div class="section-actions">
+              <button id="btn-save-script" class="btn btn-secondary">Save Script Changes</button>
+            </div>
+          </section>
+
+          <!-- Step 2: Scene Planner -->
+          <section class="card workflow-section">
+            <div class="section-header">
+              <h2>Step 2: Scene Planner</h2>
+              <button id="btn-generate-scenes" class="btn btn-primary">Generate Scene Plan</button>
+            </div>
+            <div class="scene-editor-container">
+              <table id="scenes-table" class="scenes-table">
+                <thead>
+                  <tr>
+                    <th>Scene ID</th>
+                    <th>Narration & Subtitle</th>
+                    <th>Image Prompt</th>
+                    <th>Duration & Motion</th>
+                    <th>AI Video</th>
+                    <th>Image Asset</th>
+                  </tr>
+                </thead>
+                <tbody id="scenes-list">
+                  <!-- Dynamic scenes -->
+                </tbody>
+              </table>
+            </div>
+            <div class="section-actions">
+              <button id="btn-save-scenes" class="btn btn-secondary">Save Scene Plan</button>
+            </div>
+          </section>
+
+          <!-- Step 3: Render & Export -->
+          <section class="card workflow-section">
+            <h2>Step 3: Render Video</h2>
+            <div class="render-controls">
+              <div class="render-buttons">
+                <button id="btn-render-video" class="btn btn-primary">Start FFmpeg Render</button>
+                <button id="btn-export-json" class="btn btn-secondary">Export JSON Project</button>
+              </div>
+              <div class="render-output">
+                <h3>Video Preview / Output</h3>
+                <div id="video-preview-container">
+                  <p class="placeholder-text">Video not rendered yet</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="status-toast" class="toast hidden">Status Message</div>
+  <script src="app.js"></script>
+</body>
+</html>
