@@ -1,6 +1,7 @@
 let currentProject = null;
 let voicePresets = [];
 let activeJobs = new Map();
+let imageVersion = Date.now();
 let selectedVoicePresetId = 'dark-documentary';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -283,14 +284,15 @@ function renderScenesTable(scenes, assets) {
     const videoPrompt = (scene.image_to_video_prompt || '').trim();
     const shouldGenerateVideo = Boolean(videoPrompt && scene.should_generate_video);
     let previewHtml = '<div class="scene-preview-empty">No Image</div>';
-    if (asset.hasVideo) previewHtml = `<video src="/projects/${currentProject.metadata.slug}/videos/${scene.scene_id}.mp4" class="scene-preview-img" muted playsinline onclick="this.play()"></video>`;
-    else if (asset.hasImage) previewHtml = `<img src="/projects/${currentProject.metadata.slug}/images/${scene.scene_id}.png" class="scene-preview-img" alt="Scene Asset">`;
+    if (asset.hasVideo) previewHtml = `<video src="/projects/${currentProject.metadata.slug}/videos/${scene.scene_id}.mp4?v=${imageVersion}" class="scene-preview-img" muted playsinline onclick="this.play()"></video>`;
+    else if (asset.hasImage) previewHtml = `<img src="/projects/${currentProject.metadata.slug}/images/${scene.scene_id}.png?v=${imageVersion}" class="scene-preview-img" alt="Scene Asset">`;
+    const imageButtonLabel = asset.hasImage ? 'Regenerate Image' : 'Generate Image';
     const row = document.createElement('tr');
     row.dataset.sceneId = scene.scene_id;
     row.innerHTML = `
       <td><strong>${scene.scene_id}</strong></td>
       <td><div class="form-group"><label>Narration Text:</label><textarea class="scene-narration">${scene.narration_text || ''}</textarea></div><div class="form-group"><label>Subtitle / Caption:</label><input type="text" class="scene-subtitle" value="${scene.subtitle_text || ''}"></div></td>
-      <td><textarea class="scene-prompt">${scene.image_prompt || ''}</textarea><button class="btn btn-secondary btn-block btn-gen-img" onclick="generateSceneImage('${scene.scene_id}')" style="margin-top: 0.5rem; font-size: 0.75rem; padding: 0.25rem;">Generate Image</button></td>
+      <td><textarea class="scene-prompt">${scene.image_prompt || ''}</textarea><button class="btn btn-secondary btn-block btn-gen-img" onclick="generateSceneImage('${scene.scene_id}')" style="margin-top: 0.5rem; font-size: 0.75rem; padding: 0.25rem;">${imageButtonLabel}</button></td>
       <td><div class="form-group"><label>Duration (Seconds):</label><input type="number" class="scene-duration" value="${scene.duration_seconds || 5}" min="1" max="60" style="width: 70px;"></div><div class="form-group"><label>Visual Effect:</label><select class="scene-effect"><option value="slow zoom in" ${scene.visual_effect === 'slow zoom in' ? 'selected' : ''}>Zoom In</option><option value="slow zoom out" ${scene.visual_effect === 'slow zoom out' ? 'selected' : ''}>Zoom Out</option><option value="pan left" ${scene.visual_effect === 'pan left' ? 'selected' : ''}>Pan Left</option><option value="pan right" ${scene.visual_effect === 'pan right' ? 'selected' : ''}>Pan Right</option><option value="parallax effect" ${scene.visual_effect === 'parallax effect' ? 'selected' : ''}>Parallax</option><option value="slight camera shake" ${scene.visual_effect === 'slight camera shake' ? 'selected' : ''}>Shake</option><option value="fade in" ${scene.visual_effect === 'fade in' ? 'selected' : ''}>Fade In</option><option value="fade out" ${scene.visual_effect === 'fade out' ? 'selected' : ''}>Fade Out</option></select></div></td>
       <td><input type="checkbox" class="scene-should-video" ${shouldGenerateVideo ? 'checked' : ''}><div class="form-group" style="margin-top: 0.5rem;"><textarea class="scene-video-prompt" placeholder="Video prompt..." style="font-size: 0.7rem; height: 40px;">${videoPrompt}</textarea></div></td>
       <td><div class="asset-preview-box">${previewHtml}<input type="file" class="scene-img-file" accept="image/*" style="display: none;" onchange="uploadSceneImage('${scene.scene_id}', this)"><button class="btn btn-secondary" onclick="this.previousElementSibling.click()" style="margin-top: 0.5rem; font-size: 0.7rem; padding: 0.25rem; width: 100%;">Upload</button></div></td>`;
@@ -350,7 +352,15 @@ async function saveScenes() {
 
 async function generateSceneImage(sceneId) {
   if (!currentProject) return;
-  await startJob(() => apiJson(`/api/projects/${currentProject.metadata.slug}/scenes/${sceneId}/generate-image`, { method: 'POST' }), null, () => loadProjectDetails(currentProject.metadata.slug));
+  await startJob(
+    () => apiJson(`/api/projects/${currentProject.metadata.slug}/scenes/${sceneId}/generate-image`, { method: 'POST' }),
+    null,
+    async () => {
+      imageVersion = Date.now();
+      showToast(`Image regenerated for ${sceneId}`);
+      await loadProjectDetails(currentProject.metadata.slug);
+    }
+  );
 }
 
 async function generateVoice() {
