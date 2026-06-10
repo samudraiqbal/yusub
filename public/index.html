@@ -83,8 +83,22 @@
 
           <div class="asset-actions">
             <h3>Generate Audio / SRT</h3>
+            <div class="voice-controls">
+              <label for="voice-preset-list">Voice Preset</label>
+              <select id="voice-preset-list"></select>
+              <p id="voice-preset-description" class="helper-text"></p>
+              <button id="btn-preview-voice" class="btn btn-secondary btn-block">Preview Voice</button>
+              <audio id="voice-preview-player" controls class="hidden"></audio>
+            </div>
             <button id="btn-gen-voice" class="btn btn-secondary btn-block">Generate Voice-Over</button>
             <button id="btn-gen-subs" class="btn btn-secondary btn-block">Generate SRT Subtitles</button>
+
+            <div id="progress-panel" class="progress-panel">
+              <h3>Active Progress</h3>
+              <div id="progress-list" class="progress-list">
+                <div class="progress-empty">No active jobs</div>
+              </div>
+            </div>
 
             <h3>Background Music</h3>
             <input type="file" id="music-file" accept="audio/mp3" style="display: none;">

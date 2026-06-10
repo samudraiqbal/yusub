@@ -377,3 +377,98 @@ textarea#script-editor {
 .toast.toast-error {
   border-left-color: var(--error);
 }
+
+.voice-controls {
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.voice-controls label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.35rem;
+}
+
+.voice-controls select,
+.voice-controls audio {
+  width: 100%;
+}
+
+.voice-controls audio {
+  margin-top: 0.75rem;
+}
+
+.helper-text {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+.progress-panel {
+  margin: 1rem 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-empty {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.progress-job {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.progress-job-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.progress-job-message,
+.progress-job-time,
+.progress-job-error {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.progress-job-error {
+  color: var(--error);
+  white-space: pre-wrap;
+}
+
+.progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  transition: width 0.2s ease;
+}
+
+.progress-running .progress-job-status { color: var(--gold); }
+.progress-success .progress-job-status { color: var(--success); }
+.progress-failed .progress-job-status { color: var(--error); }

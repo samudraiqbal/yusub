@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { buildImageFilter } = require('./src/render');
+const { buildImageFilter, createRenderProgressMessage } = require('./src/render');
 
 const movingEffects = ['slow zoom in', 'slow zoom out', 'pan left', 'pan right'];
 
@@ -33,3 +33,10 @@ for (const effect of movingEffects) {
 }
 
 console.log('render filter stability tests passed');
+
+assert.deepStrictEqual(
+  createRenderProgressMessage(2, 5),
+  { message: 'Rendering clip 2 / 5', current: 2, total: 5 }
+);
+
+console.log('render progress tests passed');

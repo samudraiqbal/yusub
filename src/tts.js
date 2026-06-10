@@ -11,6 +11,27 @@ function execFilePromise(cmd, args) {
   });
 }
 
+function buildEdgeTtsArgs({ voice, rate, pitch, volume, filePath, outputPath }) {
+  return [
+    '-m', 'edge_tts',
+    '--voice', voice,
+    '--rate', rate,
+    '--pitch', pitch,
+    '--volume', volume,
+    '--file', filePath,
+    '--write-media', outputPath
+  ];
+}
+
+function normalizeVoiceOptions(options = {}) {
+  return {
+    voice: options.voice || process.env.TTS_VOICE || 'en-US-GuyNeural',
+    rate: options.rate || '+0%',
+    pitch: options.pitch || '+0Hz',
+    volume: options.volume || '+0%'
+  };
+}
+
 async function getAudioDuration(filePath) {
   const stdout = await execFilePromise('ffprobe', [
     '-v', 'error',
@@ -21,15 +42,22 @@ async function getAudioDuration(filePath) {
   return Number.parseFloat(stdout.trim());
 }
 
-async function generateVoiceOver(text, outputPath, voice = process.env.TTS_VOICE || 'en-US-GuyNeural') {
+async function generateVoiceOver(text, outputPath, options = {}) {
+  const voiceOptions = normalizeVoiceOptions(typeof options === 'string' ? { voice: options } : options);
   const textPath = path.join(path.dirname(outputPath), 'tts_text.txt');
   fs.writeFileSync(textPath, text, 'utf8');
   try {
-    await execFilePromise('python', ['-m', 'edge_tts', '--voice', voice, '--file', textPath, '--write-media', outputPath]);
+    const args = buildEdgeTtsArgs({ ...voiceOptions, filePath: textPath, outputPath });
+    await execFilePromise('python', args);
     return outputPath;
   } finally {
     try { fs.unlinkSync(textPath); } catch (_) {}
   }
+}
+
+async function generateVoicePreview(text, outputPath, options = {}) {
+  await generateVoiceOver(text, outputPath, options);
+  return outputPath;
 }
 
 async function concatAudio(files, outputPath) {
@@ -42,17 +70,24 @@ async function concatAudio(files, outputPath) {
   }
 }
 
-async function generateSceneVoiceOvers(projectFolder, scenes, voice = process.env.TTS_VOICE || 'en-US-GuyNeural') {
+async function generateSceneVoiceOvers(projectFolder, scenes, options = {}, onProgress = null) {
   const voiceDir = path.join(projectFolder, 'voice');
   fs.mkdirSync(voiceDir, { recursive: true });
 
   const audioFiles = [];
   const updatedScenes = [];
 
-  for (const scene of scenes) {
+  for (const [index, scene] of scenes.entries()) {
+    if (onProgress) {
+      onProgress({
+        message: `Generating voice for scene ${index + 1} / ${scenes.length}`,
+        current: index + 1,
+        total: scenes.length
+      });
+    }
     const audioPath = path.join(voiceDir, `${scene.scene_id}.mp3`);
     const narration = scene.narration_text || scene.subtitle_text || '';
-    await generateVoiceOver(narration, audioPath, voice);
+    await generateVoiceOver(narration, audioPath, options);
     const duration = await getAudioDuration(audioPath);
     audioFiles.push(audioPath);
     updatedScenes.push({
@@ -61,8 +96,9 @@ async function generateSceneVoiceOvers(projectFolder, scenes, voice = process.en
     });
   }
 
+  if (onProgress) onProgress({ message: 'Combining voice-over files...', current: scenes.length, total: scenes.length });
   await concatAudio(audioFiles, path.join(projectFolder, 'voice.mp3'));
   return updatedScenes;
 }
 
-module.exports = { generateVoiceOver, generateSceneVoiceOvers, getAudioDuration };
+module.exports = { generateVoiceOver, generateSceneVoiceOvers, generateVoicePreview, getAudioDuration, buildEdgeTtsArgs, normalizeVoiceOptions };

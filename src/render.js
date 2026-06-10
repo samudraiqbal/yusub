@@ -105,7 +105,11 @@ async function mixAudioAndSubtitles(videoIn, voiceIn, musicIn, srtIn, videoOut, 
   return run(command);
 }
 
-async function renderVideo(projectFolder, scenes, musicVolume = 0.12) {
+function createRenderProgressMessage(current, total) {
+  return { message: `Rendering clip ${current} / ${total}`, current, total };
+}
+
+async function renderVideo(projectFolder, scenes, musicVolume = 0.12, onProgress = null) {
   const images = path.join(projectFolder, 'images');
   const videos = path.join(projectFolder, 'videos');
   const temp = path.join(projectFolder, 'temp');
@@ -121,6 +125,7 @@ async function renderVideo(projectFolder, scenes, musicVolume = 0.12) {
 
   const clips = [];
   for (const scene of scenes) {
+    const sceneIndex = clips.length + 1;
     const clip = path.join(temp, `${scene.scene_id}.mp4`);
     const videoFile = path.join(videos, `${scene.scene_id}.mp4`);
     let source = videoFile;
@@ -135,6 +140,7 @@ async function renderVideo(projectFolder, scenes, musicVolume = 0.12) {
         createPlaceholderImage(source);
       }
     }
+    if (onProgress) onProgress(createRenderProgressMessage(sceneIndex, scenes.length));
     await createSceneClip(source, clip, Number(scene.duration_seconds || 5), scene.visual_effect || 'slow zoom in', isVideo);
     clips.push(clip);
   }
@@ -142,9 +148,11 @@ async function renderVideo(projectFolder, scenes, musicVolume = 0.12) {
   const listPath = path.join(temp, 'clips.txt');
   fs.writeFileSync(listPath, clips.map(c => `file '${c.replace(/\\/g, '/')}'`).join('\n'), 'utf8');
   const concatPath = path.join(temp, 'concat.mp4');
+  if (onProgress) onProgress({ message: 'Concatenating clips...', current: scenes.length, total: scenes.length });
   await concatClips(listPath, concatPath);
+  if (onProgress) onProgress({ message: 'Mixing audio and subtitles...', current: scenes.length, total: scenes.length });
   await mixAudioAndSubtitles(concatPath, voice, fs.existsSync(music) ? music : null, srt, finalPath, musicVolume);
   return finalPath;
 }
 
-module.exports = { renderVideo, buildImageFilter };
+module.exports = { renderVideo, buildImageFilter, createRenderProgressMessage };
