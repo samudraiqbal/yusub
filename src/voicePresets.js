@@ -26,7 +26,7 @@ const VOICE_PRESETS = [
     label: 'Mystery Storyteller',
     description: 'Suspenseful, intimate narration for myths and unsolved history.',
     language: 'en',
-    voice: 'en-US-DavisNeural',
+    voice: 'en-US-ChristopherNeural',
     rate: '-10%',
     pitch: '-3Hz',
     volume: '+0%',

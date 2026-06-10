@@ -15,6 +15,7 @@ for (const preset of VOICE_PRESETS) {
   assert.strictEqual(preset.language, 'en', `${preset.id} should be English`);
 }
 
+assert.strictEqual(getVoicePreset('mystery-storyteller').voice, 'en-US-ChristopherNeural', 'Mystery Storyteller should use an edge-tts voice verified to produce audio');
 assert.strictEqual(getVoicePreset('dark-documentary').id, 'dark-documentary');
 assert.strictEqual(getVoicePreset('').id, 'dark-documentary', 'empty preset falls back to default');
 assert.strictEqual(getVoicePreset('missing').id, 'dark-documentary', 'unknown preset falls back to default');
