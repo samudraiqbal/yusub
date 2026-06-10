@@ -1,6 +1,9 @@
 # dependencies
 node_modules/
 
+# local worktrees
+.worktrees/
+
 # local secrets
 .env
 .env.local
